@@ -1,5 +1,49 @@
 fancyss_arm Changelog
 ===========================================
+4.2.0
+   - update 更新shadowsocks-libev到最新3.3.0 （2019年6月20日 编译）；
+
+4.1.9
+   - add	添加httping，并用httping检测国内外状态，原wget检测状态方式弃用，注意现在状态检测仍然是按需检测，即：
+    		只有在进入插件页面才会进行检测，退出页面后不会进行检测；
+   - add	现在状态检测不仅会显示√、×，还会显示请求检测网站header的延迟，注意此延迟不是ping！
+   - remove	移除【附加功能】中【状态更新间隔】设定功能，现在检测间隔在4000ms - 8000ms内随机取值，以避免可能的特征；
+   - update	更新内置v2ray到v4.18.0；
+   - update	同步最新规则；
+
+4.1.8
+   - add    新增v2ray-plugin支持（v2ray-plugin v1.1.0）；
+   - update 更新shadowsocks-libev到最新3.2.4 （2019年2月26日 编译）；
+   - update	同步最新规则；
+   - remove 移除simple-obfs支持；
+
+4.1.7
+   - update	更新shadowsocks-libev到最新3.2.1，simple-obfs更新到最新0.0.5 （2018年11月25日 编译）；
+   - update	更新shadowsocksrr-libev到最新，支持auth_akarin_rand和auth_akarin_spec_a协议 （2018年11月25日 编译）；
+   - update	更新kcptun到20181114
+   - update	更新v2ray制v4.6.4；
+   - update	同步最新规则；
+   - fix	修复自定义服务器解析DNS的一个问题；
+
+4.1.6
+   - add	【DNS设定】DNS劫持（原chromecast功能）添加是否启用的开关；
+   - add	【DNS设定】增加节点域名解析DNS服务器功能，现在服务器域名解析的DNS可以自己定义，而不是之前写死的114dns；
+   - fix	修复原chromecast规则在关闭插件后，iptables规则无法被正常清除的问题；
+   - update	更新oneDNS服务器地址；
+   - update	同步最新规则；
+
+4.1.5
+   - update	更新安装包内置v2ray二进制v4.3；
+   - update	同步最新规则；
+
+4.1.4
+   - fix	修复订阅对固件版本判断错误的问题；
+   - fix	修复订阅因服务商一些错误的空格，可能导致订阅后界面死掉的问题；
+   - remove	移除v2ray在arm机型上虚拟内存的需求（原因：https://www.v2ray.com/chapter_02/env.html#buffer-size），不过对于256M内存的机器，仍然建议使用虚拟内存，但是不强制。
+   - update	同步v2ray二进制v3.47；
+   - update	同步最新规则；
+
+
 4.1.2 - 4.1.3
    - fix	修复使用v2ray gui配置提示json格式不对的问题。（fixed in 4.1.3）
    - notes	建议大家将固件版本升级到X7.9.1，X7.9.1使用skipdv3作为插件的数据储存，可以大大避免插件出现一些莫名的问题 #62。

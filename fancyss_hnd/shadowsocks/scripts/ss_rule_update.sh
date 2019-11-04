@@ -1,6 +1,9 @@
 #!/bin/sh
-eval `dbus export ss`
+
+# shadowsocks script for HND/AXHND router with kernel 4.1.27/4.1.51 merlin firmware
+
 source /koolshare/scripts/base.sh
+eval $(dbus export ss_basic_)
 alias echo_date='echo 【$(TZ=UTC-8 date -R +%Y年%m月%d日\ %X)】:'
 
 start_update(){
@@ -53,7 +56,7 @@ start_update(){
 					mv /tmp/gfwlist.conf /koolshare/ss/rules/gfwlist.conf
 					sed -i "1s/.*/$git_line1/" /koolshare/ss/rules/version
 					reboot="1"
-					echo_date 【更新成功】你的gfwlist已经更新到最新了哦~
+					echo_date 【更新成功】你的gfwlist已经更新到最新！
 				else
 					echo_date 下载完成，但是校验没有通过！
 				fi
@@ -82,7 +85,7 @@ start_update(){
 					mv /tmp/chnroute.txt /koolshare/ss/rules/chnroute.txt
 					sed -i "2s/.*/$git_line2/" /koolshare/ss/rules/version
 					reboot="1"
-					echo_date 【更新成功】你的chnroute已经更新到最新了哦~
+					echo_date 【更新成功】你的chnroute已经更新到最新！
 				else
 					echo_date md5sum 下载完成，但是校验没有通过！
 				fi
@@ -110,7 +113,7 @@ start_update(){
 					mv /tmp/cdn.txt /koolshare/ss/rules/cdn.txt
 					sed -i "4s/.*/$git_line4/" /koolshare/ss/rules/version
 					reboot="1"
-					echo_date 【更新成功】你的cdn名单已经更新到最新了哦~
+					echo_date 【更新成功】你的cdn名单已经更新到最新！
 				else
 					echo_date 下载完成，但是校验没有通过！
 				fi
@@ -137,6 +140,7 @@ start_update(){
 	
 	nvram set ipset_numbers=$(cat /koolshare/ss/rules/gfwlist.conf | grep -c ipset)
 	nvram set chnroute_numbers=$(cat /koolshare/ss/rules/chnroute.txt | grep -c .)
+	nvram set chnroute_ips=$(awk -F "/" '{sum += 2^(32-$2)};END {print sum}' /koolshare/ss/rules/chnroute.txt)
 	nvram set cdn_numbers=$(cat /koolshare/ss/rules/cdn.txt | grep -c .)
 	#======================================================================
 	# reboot ss

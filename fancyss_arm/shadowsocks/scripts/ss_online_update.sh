@@ -27,8 +27,8 @@ SOCKS_FLAG=0
 # ssconf_basic_rss_protocol_
 # ssconf_basic_rss_protocol_param_
 # ssconf_basic_server_
-# ssconf_basic_ss_obfs_
-# ssconf_basic_ss_obfs_host_
+# ssconf_basic_ss_v2ray_plugin_
+# ssconf_basic_ss_v2ray_plugin_opts_
 # ssconf_basic_use_kcp_
 # ssconf_basic_use_lb_
 # ssconf_basic_lbmode_
@@ -65,8 +65,13 @@ unset_lock(){
 detect(){
 	# 检测版本号
 	firmware_version=`nvram get extendno|cut -d "X" -f2|cut -d "-" -f1|cut -d "_" -f1`
-	firmware_comp=`versioncmp $firmware_version 7.7`
-	if [ "$firmware_comp" == "0" -a "$firmware_comp" == "-1" ];then
+	if [ -f "/usr/bin/versioncmp" ];then
+		firmware_comp=`versioncmp $firmware_version 7.7`
+	else
+		firmware_comp="1"
+	fi
+	
+	if [ "$firmware_comp" == "0" -o "$firmware_comp" == "-1" ];then
 		echo_date 检测到$firmware_version固件，支持订阅！
 	else
 		echo_date 订阅功能不支持X7.7以下的固件，当前固件版本$firmware_version，请更新固件！
@@ -105,8 +110,8 @@ prepare(){
 		[ -n "$(dbus get ssconf_basic_rss_protocol_$nu)" ] && echo dbus set ssconf_basic_rss_protocol_$q=$(dbus get ssconf_basic_rss_protocol_$nu) >> /tmp/ss_conf.sh
 		[ -n "$(dbus get ssconf_basic_rss_protocol_param_$nu)" ] && echo dbus set ssconf_basic_rss_protocol_param_$q=$(dbus get ssconf_basic_rss_protocol_param_$nu) >> /tmp/ss_conf.sh
 		[ -n "$(dbus get ssconf_basic_server_$nu)" ] && echo dbus set ssconf_basic_server_$q=$(dbus get ssconf_basic_server_$nu) >> /tmp/ss_conf.sh
-		[ -n "$(dbus get ssconf_basic_ss_obfs_$nu)" ] && echo dbus set ssconf_basic_ss_obfs_$q=$(dbus get ssconf_basic_ss_obfs_$nu) >> /tmp/ss_conf.sh
-		[ -n "$(dbus get ssconf_basic_ss_obfs_host_$nu)" ] && echo dbus set ssconf_basic_ss_obfs_host_$q=$(dbus get ssconf_basic_ss_obfs_host_$nu) >> /tmp/ss_conf.sh
+		[ -n "$(dbus get ssconf_basic_ss_v2ray_plugin_$nu)" ] && echo dbus set ssconf_basic_ss_v2ray_plugin_$q=$(dbus get ssconf_basic_ss_v2ray_plugin_$nu) >> /tmp/ss_conf.sh
+		[ -n "$(dbus get ssconf_basic_ss_v2ray_plugin_opts_$nu)" ] && echo dbus set ssconf_basic_ss_v2ray_plugin_opts_$q=$(dbus get ssconf_basic_ss_v2ray_plugin_opts_$nu) >> /tmp/ss_conf.sh
 		[ -n "$(dbus get ssconf_basic_use_kcp_$nu)" ] && echo dbus set ssconf_basic_use_kcp_$q=$(dbus get ssconf_basic_use_kcp_$nu) >> /tmp/ss_conf.sh
 		[ -n "$(dbus get ssconf_basic_use_lb_$nu)" ] && echo dbus set ssconf_basic_use_lb_$q=$(dbus get ssconf_basic_use_lb_$nu) >> /tmp/ss_conf.sh
 		[ -n "$(dbus get ssconf_basic_lbmode_$nu)" ] && echo dbus set ssconf_basic_lbmode_$q=$(dbus get ssconf_basic_lbmode_$nu) >> /tmp/ss_conf.sh
@@ -298,7 +303,7 @@ get_v2ray_remote_config(){
 	decode_link="$1"
 	v2ray_group="$2"
 	v2ray_v=$(echo "$decode_link" | jq -r .v)
-	v2ray_ps=$(echo "$decode_link" | jq -r .ps)
+	v2ray_ps=$(echo "$decode_link" | jq -r .ps | sed 's/[ \t]*//g')
 	v2ray_add=$(echo "$decode_link" | jq -r .add | sed 's/[ \t]*//g')
 	v2ray_port=$(echo "$decode_link" | jq -r .port | sed 's/[ \t]*//g')
 	v2ray_id=$(echo "$decode_link" | jq -r .id | sed 's/[ \t]*//g')
@@ -307,6 +312,7 @@ get_v2ray_remote_config(){
 	v2ray_type=$(echo "$decode_link" | jq -r .type)
 	v2ray_tls_tmp=$(echo "$decode_link" | jq -r .tls)
 	[ "$v2ray_tls_tmp"x == "tls"x ] && v2ray_tls="tls" || v2ray_tls="none"
+	
 	if [ "$v2ray_v" == "2" ];then
 		#echo_date "new format"
 		v2ray_path=$(echo "$decode_link" |jq -r .path)
@@ -475,8 +481,8 @@ del_none_exist(){
 				dbus remove ssconf_basic_rss_protocol_param_$localindex
 				dbus remove ssconf_basic_server_$localindex
 				dbus remove ssconf_basic_server_ip_$localindex
-				dbus remove ssconf_basic_ss_obfs_$localindex
-				dbus remove ssconf_basic_ss_obfs_host_$localindex
+				dbus remove ssconf_basic_ss_v2ray_plugin_$localindex
+				dbus remove ssconf_basic_ss_v2ray_plugin_opts_$localindex
 				dbus remove ssconf_basic_use_kcp_$localindex
 				dbus remove ssconf_basic_use_lb_$localindex
 				dbus remove ssconf_basic_lbmode_$localindex
@@ -532,7 +538,7 @@ remove_node_gap(){
 				[ -n "$(dbus get ssconf_basic_rss_protocol_param_$nu)" ] && dbus set ssconf_basic_rss_protocol_param_"$y"="$(dbus get ssconf_basic_rss_protocol_param_$nu)" && dbus remove ssconf_basic_rss_protocol_param_$nu
 				[ -n "$(dbus get ssconf_basic_server_$nu)" ] && dbus set ssconf_basic_server_"$y"="$(dbus get ssconf_basic_server_$nu)" && dbus remove ssconf_basic_server_$nu
 				[ -n "$(dbus get ssconf_basic_server_ip_$nu)" ] && dbus set ssconf_basic_server_ip_"$y"="$(dbus get ssconf_basic_server_ip_$nu)" && dbus remove ssconf_basic_server_ip_$nu
-				[ -n "$(dbus get ssconf_basic_ss_obfs_host_$nu)" ] && dbus set ssconf_basic_ss_obfs_host_"$y"="$(dbus get ssconf_basic_ss_obfs_host_$nu)" && dbus remove ssconf_basic_ss_obfs_host_$nu
+				[ -n "$(dbus get ssconf_basic_ss_v2ray_plugin_opts_$nu)" ] && dbus set ssconf_basic_ss_v2ray_plugin_opts_"$y"="$(dbus get ssconf_basic_ss_v2ray_plugin_opts_$nu)" && dbus remove ssconf_basic_ss_v2ray_plugin_opts_$nu
 				[ -n "$(dbus get ssconf_basic_use_kcp_$nu)" ] && dbus set ssconf_basic_use_kcp_"$y"="$(dbus get ssconf_basic_use_kcp_$nu)" && dbus remove ssconf_basic_use_kcp_$nu
 				[ -n "$(dbus get ssconf_basic_use_lb_$nu)" ] && dbus set ssconf_basic_use_lb_"$y"="$(dbus get ssconf_basic_use_lb_$nu)" && dbus remove ssconf_basic_use_lb_$nu
 				[ -n "$(dbus get ssconf_basic_lbmode_$nu)" ] && dbus set ssconf_basic_lbmode_"$y"="$(dbus get ssconf_basic_lbmode_$nu)" && dbus remove ssconf_basic_lbmode_$nu
@@ -575,10 +581,10 @@ open_socks_23456(){
 		elif  [ "$ss_basic_type" == "0" ];then
 			SOCKS_FLAG=2
 			echo_date 开启ss-local，提供socks5代理端口：23456
-			if [ "$ss_basic_ss_obfs" == "0" ];then
+			if [ "$ss_basic_ss_v2ray_plugin" == "0" ];then
 				ss-local -l 23456 -c $CONFIG_FILE -u -f /var/run/sslocal1.pid >/dev/null 2>&1
 			else
-				ss-local -l 23456 -c $CONFIG_FILE $ARG_OBFS -u -f /var/run/sslocal1.pid >/dev/null 2>&1
+				ss-local -l 23456 -c $CONFIG_FILE $ARG_V2RAY_PLUGIN -u -f /var/run/sslocal1.pid >/dev/null 2>&1
 			fi
 		fi
 	fi
@@ -856,8 +862,8 @@ start_update(){
 						dbus remove ssconf_basic_rss_protocol_param_$conf_nu
 						dbus remove ssconf_basic_server_$conf_nu
 						dbus remove ssconf_basic_server_ip_$conf_nu
-						dbus remove ssconf_basic_ss_obfs_$conf_nu
-						dbus remove ssconf_basic_ss_obfs_host_$conf_nu
+						dbus remove ssconf_basic_ss_v2ray_plugin_$conf_nu
+						dbus remove ssconf_basic_ss_v2ray_plugin_opts_$conf_nu
 						dbus remove ssconf_basic_use_kcp_$conf_nu
 						dbus remove ssconf_basic_use_lb_$conf_nu
 						dbus remove ssconf_basic_lbmode_$conf_nu
@@ -1015,8 +1021,8 @@ remove_online(){
 		dbus remove ssconf_basic_rss_protocol_param_$remove_nu
 		dbus remove ssconf_basic_server_$remove_nu
 		dbus remove ssconf_basic_server_ip_$remove_nu
-		dbus remove ssconf_basic_ss_obfs_$remove_nu
-		dbus remove ssconf_basic_ss_obfs_host_$remove_nu
+		dbus remove ssconf_basic_ss_v2ray_plugin_$remove_nu
+		dbus remove ssconf_basic_ss_v2ray_plugin_opts_$remove_nu
 		dbus remove ssconf_basic_use_kcp_$remove_nu
 		dbus remove ssconf_basic_use_lb_$remove_nu
 		dbus remove ssconf_basic_lbmode_$remove_nu
